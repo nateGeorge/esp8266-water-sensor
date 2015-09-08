@@ -22,8 +22,13 @@ if waterHeight == nil then
     waterHeight = 0
 end
 dataToSend[lastNum + 1] = {'Water Height', waterHeight}
+if waterHeight == 5 then
+    dataToSend[lastNum + 2] = {'Water Full', 1}
+else
+    dataToSend[lastNum + 2] = {'Water Full', 0}
+end
 sendToTS = require("sendToTS")
-sendToTS.sendData(dataToSend, true)
+sendToTS.sendData(dataToSend, false, true)
 
-sendToSparkfun = nil
+sendToTS = nil
 package.loaded["sendToTS"]=nil

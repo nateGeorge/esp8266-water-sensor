@@ -11,7 +11,7 @@ waterLevels[4] = {6, 4}
 waterLevels[5] = {7, 5}
 for num, arr in ipairs(waterLevels) do
     gpio.mode(arr[1], gpio.INPUT)
-    dataToSend[num] = {tostring(arr[2]), gpio.read(arr[1])}
+    dataToSend[num] = {tostring(arr[2]).."ft", gpio.read(arr[1])}
     if gpio.read(arr[1]) == 1 then
         waterHeight = arr[2];
     end
@@ -36,11 +36,13 @@ tmr.alarm(4, 10*1000, 1, function()
         dataToSend[lastNum + 2] = {'Water Full', 0}
     end
     sendToTS = require("sendToTS")
-    sendToTS.sendData('JSF water level keys', dataToSend, false, true)
+    if waterHeight >= 4 then
+        sendToTS.sendData('JSF water level keys', dataToSend, false, true, function()
+            
+            end)
+    else
+        sendToTS.sendData('JSF water level keys', dataToSend, false, true, function() print('done') end)
+    end
     sendToTS = nil
     package.loaded["sendToTS"]=nil
-    if waterHeight >= 4 then
-        tmr.stop(4)
-        node.dsleep(5*60*1000*1000) -- deep sleep for 5 minutes
-    end
 end)

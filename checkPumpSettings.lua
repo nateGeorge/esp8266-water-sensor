@@ -1,46 +1,57 @@
 -- checks for updated settings from thingspeak channel, called after reading settings
 manualRun = false -- if the 'run pump' button has been clicked or set
+print(createdTimes[1])
 if file.open('latestTime') then
-    latestTime = file.readline()
-    print(latestTime)
-    print(createdTimes[1])
+    local line = file.readline()
+    latestTime = string.sub(line,1,string.len(line)-1) -- hack to remove CR/LF
+    print('latest time: '..latestTime)
+    print('latest time from server:'..createdTimes[1])
     if latestTime~=createdTimes[1] then
-        if fields[1]~='null' and fields[2]~='null' and fields[3]~='null' then
+        if fields[1]~=nil and fields[2]~=nil and fields[3]~=nil then
             file.open('heights','w+')
             file.writeline(fields[1])
             file.writeline(fields[2])
             file.writeline(fields[3])
             file.close()
         end
-        
-        if fields[4]==1 and fields[5]~='null' then
-            timeToOff = fields[4];
+        print(fields[4]==1 and fields[5]~=nil)
+        print('fields:')
+        for i,v in ipairs(fields) do
+            print(v)
+        end
+        if tonumber(fields[4])==1 and fields[5]~=nil then
+            timeToOff = tonumber(fields[5]);
             manualRun = true
+            print('manually running pump for '..tostring(timeToOff)..' minutes')
             dofile('turn on pump.lua')
         end
-        
-        if fields[6]==1 then
+        print('fields6:'..fields[6])
+        tmr.delay(10000000)
+        if tonumber(fields[6])==1 then
+            print('turning off pump')
             manualRun = true
             gpio.write(relayPin, gpio.LOW())
-            tmr.alarm(3, 5*60*1000, 0, function()
-                dofile('init.lua')
-            end)
+            dofile('pauseAndRestart.lua')
         end
     end
     file.close()
-    file.open('latesttime','w+')
+    file.open('latestTime','w+')
     file.writeline(createdTimes[1])
     file.close()
 else
-    file.open('latesttime','w+')
+    file.open('latestTime','w+')
     file.writeline(createdTimes[1])
     file.close()
 end
 
 if file.open('heights') and not manualRun then
-    minHeight = file.readline()
-    maxHeight = file.readline()
-    timeToOff = file.readline()*60
+    local line = file.readline()
+    minHeight = string.sub(line,1,string.len(line)-1) -- hack to remove CR/LF
+    line = file.readline()
+    maxHeight = string.sub(line,1,string.len(line)-1) -- hack to remove CR/LF
+    line = file.readline()
+    line = string.sub(line,1,string.len(line)-1) -- hack to remove CR/LF
+    timeToOff = tonumber(line)*60
     file.close()
 elseif not manualRun then
     minHeight = 2
@@ -51,5 +62,6 @@ if maxHeight~=nil and not manualRun then
     print('min height: '..tostring(minHeight))
     print('max height:'..tostring(maxHeight))
     print('max time on: '..tostring(timeToOff))
+    print('turning on pump until full')
     dofile('turn on pump.lua')
 end

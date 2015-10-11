@@ -11,15 +11,16 @@ print('time to shutoff: '..tostring(shutOff))
 
 local function stopPump()
     print('stopping pump because max time reached')
-    gpio.write(relayPin, gpio.LOW)
+    print('turning off pump')
     dataToSend[1] = {"pump on", 0}
     sendToTS = require("sendToTS")
     sendToTS.sendData("JSF pump keys", dataToSend, false, true, 'pauseAndRestart.lua')
     sendToTS = nil
     package.loaded["sendToTS"]=nil
+    gpio.write(relayPin, gpio.LOW)
 end
 
-tmr.alarm(2, 10*1000, 0, function()
+tmr.alarm(2, 60*1000, 0, function()
     print('checking pump settings, then water height')
     if ((tmr.now()/(1000*1000)-startTime) >= shutOff) then
         stopPump()

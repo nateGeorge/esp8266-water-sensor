@@ -5,7 +5,7 @@ if file.open('latestTime') then
     local line = file.readline()
     latestTime = string.sub(line,1,string.len(line)-1) -- hack to remove CR/LF
     print('latest time: '..latestTime)
-    print('latest time from server:'..createdTimes[1])
+    print('latest time from server: '..createdTimes[1])
     if latestTime~=createdTimes[1] then
         if fields[1]~=nil and fields[2]~=nil and fields[3]~=nil then
             file.open('heights','w+')
@@ -27,18 +27,17 @@ if file.open('latestTime') then
         end
         if tonumber(fields[6])==1 then
             print('turning off pump')
-            dataToSend[1] = {"pump on", 0}
-            sendToTS = require("sendToTS")
-            sendToTS.sendData("JSF pump keys", dataToSend, false, true, 'pauseAndRestart.lua')
-            sendToTS = nil
-            package.loaded["sendToTS"]=nil
             file.close()
             file.open('latestTime','w+')
             file.writeline(createdTimes[1])
             file.close()
             manualRun = true
             gpio.write(relayPin, gpio.LOW)
-            dofile('pauseAndRestart.lua')
+            dataToSend[1] = {"pump on", 0}
+            sendToTS = require("sendToTS")
+            sendToTS.sendData("JSF pump keys", dataToSend, false, true, 'pauseAndRestart.lua')
+            sendToTS = nil
+            package.loaded["sendToTS"]=nil
         end
     end
     file.close()

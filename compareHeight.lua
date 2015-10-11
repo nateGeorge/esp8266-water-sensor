@@ -1,13 +1,16 @@
 -- if we have reached the cutoff height for stopping the pump, turn off the pump and wait for next reading
+dataToSend = {}
 print('water height: '..fields[6]..', max height: '..tostring(maxHeight))
-if tonumber(fields[6])>=maxHeight then
+if tonumber(fields[6])>=tonumber(maxHeight) then
     print('stopping pump, water full')
-    tmr.stop(6)
-    tmr.stop(5)
+    print('turning off pump')
+    dataToSend[1] = {"pump on", 0}
     sendToTS = require("sendToTS")
-    sendToTS.sendData("JSF pump keys", {"pump on", 0}, false, true, 'pauseAndRestart.lua')
+    sendToTS.sendData("JSF pump keys", dataToSend, false, true, 'pauseAndRestart.lua')
     sendToTS = nil
     package.loaded["sendToTS"]=nil
-else
+    gpio.write(relayPin, gpio.LOW)
+    tmr.stop(2)
+elseif tonumber(fields[6])<=tonumber(minHeight) then
     dofile('turn on pump.lua')
 end

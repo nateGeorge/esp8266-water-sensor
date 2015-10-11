@@ -1,5 +1,5 @@
 -- gpio pins 0 and 2 on the esp01 are actually 3 and 4 in nodemcu land
-relayPin = 1
+relayPin = 2
 gpio.mode(relayPin, gpio.OUTPUT)
 gpio.write(relayPin, gpio.LOW)
 noConnectCount = 0

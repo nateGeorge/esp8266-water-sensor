@@ -1,0 +1,2 @@
+used this diagram for inspiration http://www.electroschematics.com/6519/simple-soil-moisture-sensor-arduino-project/
+but used a 630R resistor in between GND and pin instead of 5V and pin

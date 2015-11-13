@@ -15,9 +15,13 @@ function connectMQTT(user, password, callback)
         if (topic == "wellSystem/"..user.."/setting/shortSleepTime") then
             shortSleepTime = tonumber(data)
             save_setting('shortSleepTime', shortSleepTime)
+            mqtt:publish("wellSystem/"..user,"confirm shortSleepTime "..
+            data, 0, 0, function(conn) end)
         elseif (topic == "wellSystem/"..user.."/setting/longSleepTime") then
             longSleepTime = tonumber(data)
             save_setting('longSleepTime', longSleepTime)
+            mqtt:publish("wellSystem/"..user,"confirm longSleepTime "..
+            data, 0, 0, function(conn) end)
         end
       end
     end)
@@ -28,7 +32,7 @@ function connectMQTT(user, password, callback)
       -- subscribe topic with qos = 0
       mqtt:subscribe("wellSystem/#", 0, function(conn) 
           -- report that we are online, wait for any setpoint changes
-          mqtt:publish("wellSystem/"..user,"online",0,0, function(conn) 
+          mqtt:publish("wellSystem/"..user,"online", 0, 0, function(conn) 
           print("sent")
           end)
           tmr.alarm(3, 5000, 0, function() callback() end) -- wait for a few seconds to recieve settings
